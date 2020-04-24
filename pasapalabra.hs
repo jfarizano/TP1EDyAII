@@ -46,6 +46,11 @@ delete s@(k:ks) n@(Node c v E E r) | k == c = if ks == [] then r else n
 delete (k:ks) n@(Node c v E m E) | k == c = if ks == [] then Node c Nothing E m E
                                                         else convertirEnHoja (Node c v E (delete ks m) E)
                                  | otherwise = n
+delete s@(k:ks) n@(Node c v l E r) | k == c = if ks == [] then let (nk, nv, nm) = maximumT l 
+                                                               in Node nk nv (delMax l) nm r 
+                                                          else n
+                                   | k < c = Node c v (delete s l) E r
+                                   | otherwise = Node c v l E (delete s r)
 delete s@(k:ks) n@(Node c v l m r) | k == c = if ks == [] then Node c Nothing l m r
                                                           else Node c v l (delete ks m) r
                                    | k < c = Node c v (delete s l) m r
@@ -55,6 +60,18 @@ convertirEnHoja :: Ord k => TTree k v -> TTree k v
 convertirEnHoja (Node c Nothing E E E) = E
 convertirEnHoja (Node c v E E E) = (Leaf c (fromJust v))
 convertirEnHoja n = n
+
+maximumT :: Ord k => TTree k v -> (k, Maybe v, TTree k v)
+maximumT (Leaf k v) = (k, Just v, E)
+maximumT (Node k v _ m r) = case r of
+                                   E -> (k, v, m) 
+                                   _ -> maximumT r
+
+delMax :: Ord k => TTree k v -> TTree k v
+delMax (Leaf _ _) = E
+delMax (Node _ _ l _ r) = case r of
+                                 E -> l
+                                 _ -> delMax r
 
 -- Dado un  ́arbol devuelve una lista ordenada con las claves del mismo
 keys :: Ord k => TTree k v -> [[k]]
@@ -82,3 +99,5 @@ instance Ord k => Dic [k] v (TTree k v) where
   claves = keys
 
 t = insert "se" 8 (insert "sin" 7 (insert "si" 4 (insert "ras" 1 (insert "res" 4 (insert "red" 9 (insert "reo" 2 (insert "re" 16 E)))))))
+
+q = insert "rea" 5 (insert "redes" 6 t)
