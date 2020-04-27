@@ -2,6 +2,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
+-- Trabajo Práctico 1: Estructuras de Datos y Algoritmos II
+-- Integrantes: Farizano, Juan Ignacio ~ Mellino, Natalia.
+
 import Data.Maybe
 
 data TTree k v = Node k (Maybe v) (TTree k v) (TTree k v) (TTree k v) | 
@@ -31,8 +34,8 @@ insert s@(k:ks) v (Node c b l m r) | k == c = if ks == [] then Node c (Just v) l
                                    | k < c = Node c b (insert s v l) m r
                                    | otherwise = Node c b l m (insert s v r)
 
--- Elimina una clave y el valor asociada a ésta en un árbol
--- Limpiando nodos huérfanos, y convirtiendo en hoja los nodos sin hijos.
+-- Elimina una clave y el valor asociada a ésta en un árbol,
+-- limpiando nodos huérfanos, y convirtiendo en hoja los nodos sin hijos.
 delete :: Ord k => [k] -> TTree k v -> TTree k v
 delete _ E = E
 delete [] n = n
@@ -67,10 +70,10 @@ delete s@(k:ks) n@(Node c v l m r) | k == c = if ks == [] then Node c Nothing l 
                                    | k < c = Node c v (delete s l) m r
                                    | otherwise = Node c v l m (delete s r)
 
--- Dado un nodo, si este no tiene hijos y tiene valor Nothing, devuelve vacío
--- si guarda un valor Just a, devuelve una hoja con la misma clave y el valor a.
+-- Dado un nodo, si este no tiene hijos y tiene valor Nothing, devuelve vacío.
+-- Si guarda un valor Just a, devuelve una hoja con la misma clave y el valor a.
 -- Si tiene un solo hijo lateral, devuelve el mismo reordenado.
--- En caso contrario (tiene hijos), devuelve el mismo nodo
+-- En caso contrario (tiene hijos), devuelve el mismo nodo.
 reorder :: Ord k => TTree k v -> TTree k v
 reorder (Node _ Nothing E E E) = E
 reorder (Node _ Nothing l E E) = reorder l
@@ -79,14 +82,14 @@ reorder (Node c v E E E) = (Leaf c (fromJust v))
 reorder n = n
 
 -- Busca el nodo con la clave máxima en un árbol, devuelve su clave, valor
--- y su hijo del medio en una 3-upla
+-- y su hijo del medio en una 3-upla.
 maximumT :: Ord k => TTree k v -> (k, Maybe v, TTree k v)
 maximumT (Leaf k v) = (k, Just v, E)
 maximumT (Node k v _ m E) = (k, v, m)
 maximumT (Node _ _ _ _ r) = maximumT r
 
 -- Elimina el hijo máximo de un árbol, si este tenía un hijo izquierdo lo
--- devuelve, y si era una hoja devuelve vacío
+-- devuelve, y si era una hoja devuelve vacío.
 delMax :: Ord k => TTree k v -> TTree k v
 delMax (Leaf _ _) = E
 delMax (Node k v l m E) = l
@@ -116,11 +119,3 @@ instance Ord k => Dic [k] v (TTree k v) where
   buscar = search
   eliminar = delete
   claves = keys
-
-t = insert "se" 8 (insert "sin" 7 (insert "si" 4 (insert "ras" 1 (insert "res" 4 (insert "red" 9 (insert "reo" 2 (insert "re" 16 E)))))))
-
-q = insert "ree" 1 (insert "refi" 6 (insert "ref" 3 (insert "rea" 5 (insert "redes" 6 t))))
-
-e = insert "ref" 4 t
-
-y = delete "si" (delete "se" (insert "sz" 5 t))
